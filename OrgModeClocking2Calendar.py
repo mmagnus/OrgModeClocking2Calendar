@@ -107,6 +107,10 @@ if __name__ == '__main__':
             startdt = prepare_date(start, retdata=True)
             cutoff = timedelta(days=args.days)
             delta = datetime.datetime.now() - startdt
+
+            curr_task = curr_task.replace('DONE ', '').replace('TODO ', '').replace('INPROGRESS ', '')
+            curr_prj = curr_prj.replace('DONE ', '').replace('TODO ', '').replace('INPROGRESS ', '')
+            
             print('∆:', delta, 'cutoff:', cutoff, 'use it:', delta < cutoff)
             print("%s %s %s %s" % (curr_prj, curr_task, prepare_date(start, verbose=args.verbose), prepare_date(end, verbose=args.verbose)))
 
