@@ -1,8 +1,33 @@
 OrgModeClocking2Calendar
 -------------------------------------------------------------------------------
-
 The script will perform one way synchronization of your clocking (time tracking) entries [1] from OrgMode Emacs.
 ![](example.png)
+
+    $ ./OrgModeClocking2Calendar.py -h
+    usage: OrgModeClocking2Calendar.py [-h] [--debug] [-d DAYS] [-v] [--log LOG]
+                                       [--date DATE] [--dry]
+                                       calendar file
+
+    - fix arguments not to be hard coded
+    - solve a problem if there is no log file
+
+    Required:
+    - empty files with logs
+
+    positional arguments:
+      calendar              calendar you want to send your data to
+      file                  an OrgMode file
+
+    optional arguments:
+      -h, --help            show this help message and exit
+      --debug               be verbose
+      -d DAYS, --days DAYS
+      -v, --verbose
+      --log LOG
+      --date DATE           in format 2010-01-01
+      --dry
+
+Example:
 
     $ ./OrgModeTimeTracker2Calendar.py 'Clocking Life' ~/Dropbox/geekbook/notes/work-curr.org
     ∆: 17 days, 12:47:34.673081 cutoff: 1 day, 0:00:00 use it: False
@@ -18,5 +43,7 @@ The script will perform one way synchronization of your clocking (time tracking)
     Marcin Magnus, PhD https://mmagnus.io Talk with science people Tuesday, July 03, 2018 02:00 PM None
     Skip this task, too old!
     (...)
+
+The script is straightforward, it's a hack in some sense. For each clocking entry, an Apple Script is generated and Apple Tell is executed to push a new even to selected Calendar. Works only on Mac. All already entered entries go to a log file, so they are not entered one again.
 
 [1] https://orgmode.org/manual/Clocking-commands.html#Clocking-commands

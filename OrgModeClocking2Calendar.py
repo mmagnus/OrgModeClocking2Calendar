@@ -22,7 +22,22 @@ time.tzset()
 from datetime import date, timedelta
 
 
-def prepare_date(str, retdata=False, verbose=False):
+def get_parser():
+    parser = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser.add_argument("--debug",
+                        action="store_true", help="be verbose")
+    parser.add_argument("-d", "--days",  type=int) # default=1,
+    parser.add_argument("-v", "--verbose", action="store_true")
+    parser.add_argument("--log")
+    parser.add_argument("--date", help="in format 2010-01-01")
+    parser.add_argument("calendar", help="calendar you want to send your data to", default="Clocking Work")
+    parser.add_argument("--dry", action="store_true")
+    parser.add_argument("file", help="an OrgMode file")
+    return parser
+
+
+def prepare_date(str, retdata=False, double=False, verbose=False):
     """Format the date from 2018-06-18 Mon 13:00 to Monday, June 18, 2018 01:00 PM.
     """
     if verbose: print(); print(str)
@@ -41,13 +56,20 @@ def prepare_date(str, retdata=False, verbose=False):
     hour, min = [int(i) for i in timex.split(':')]
     year, month, day = [int(i) for i in date.split('-')]
     dt = datetime.datetime(year, month, day, hour, min, 0, 0)
-    if retdata:
-        return dt
+
+    if double:
+        if retdata:
+            return dt, datetime.date(year, month, day)
+        else:
+            return dt.strftime("%A, %B %d, %Y %I:%M %p"), dt.strftime("%A, %B %d")  # return as a string
     else:
-        return dt.strftime("%A, %B %d, %Y %I:%M %p")  # return as a string
+        if retdata:
+            return dt
+        else:
+            return dt.strftime("%A, %B %d, %Y %I:%M %p")
 
 
-def insert_event(calendar, project, task, start, end):
+def insert_event(calendar, project, task, start, end, dry):
     """Insert an event into calendar using Apple tell"""
     # you can use also activate, to move Calendar to the top
     cmd = """
@@ -61,31 +83,27 @@ def insert_event(calendar, project, task, start, end):
     end tell""" % (calendar, start, end, '', task + ' (' + project + ')')
     #  summary:"[#A] Diet box <2018-09-28 Fri>(#health & #look :@health:)",
     # now the format is <task> (<project>)
-
     print(cmd)
     with open("/tmp/orgmode2calendar.scpt", 'w') as f:
         f.write(cmd)
-    os.system("osascript /tmp/orgmode2calendar.scpt")
+    if not dry:
+        os.system("osascript /tmp/orgmode2calendar.scpt")
 
 
-def get_parser():
-    parser = argparse.ArgumentParser(
-        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("--debug",
-                        action="store_true", help="be verbose")
-    parser.add_argument("-d", "--days", default=1, type=int)
-    parser.add_argument("-v", "--verbose", action="store_true")
-    parser.add_argument("calendar", help="calendar you want to send your data to", default="Clocking Work")
-    parser.add_argument("file", help="an OrgMode file")
-    return parser
 
 
+# main
 if __name__ == '__main__':
     parser = get_parser()
     args = parser.parse_args()
 
     f = open(args.file)
     items = []
+
+    if args.log:
+        logfn = args.log
+    else:
+        logfn = os.path.basename(args.file.replace('.org', '.log'))
 
     for l in f:
         if l.startswith('* '):
@@ -104,21 +122,34 @@ if __name__ == '__main__':
             end = end.strip()
 
             ###
-            startdt = prepare_date(start, retdata=True)
-            cutoff = timedelta(days=args.days)
-            delta = datetime.datetime.now() - startdt
-
+            startdt, startdt_day = prepare_date(start, retdata=True, double=True)
             curr_task = curr_task.replace('DONE ', '').replace('TODO ', '').replace('INPROGRESS ', '')
             curr_prj = curr_prj.replace('DONE ', '').replace('TODO ', '').replace('INPROGRESS ', '')
             
-            print('∆:', delta, 'cutoff:', cutoff, 'use it:', delta < cutoff)
+            if args.debug: print('∆:', delta, 'cutoff:', cutoff, 'use it:', delta < cutoff)
+            try:
+                if args.debug: print(curr_prj)
+            except NameError:
+                if args.debug: print("Error in %s" % l)
             print("%s %s %s %s" % (curr_prj, curr_task, prepare_date(start, verbose=args.verbose), prepare_date(end, verbose=args.verbose)))
+                
+            if args.date:
+                # if given date
+                d = [int(x) for x in args.date.split('-')]
+                d = date(d[0], d[1], d[2])
+                if startdt_day != d: # 2020-03-19 2020-03-19
+                    #if args.verbose:
+                    print('Skip this task, not the day')                    
+                    continue
 
-            if not (delta < cutoff):
-                print('Skip this task, too old!')
-                continue
-            ###
-
+            # id days, then if old task then skip
+            if args.days:
+                cutoff = timedelta(days=args.days)
+                delta = datetime.datetime.now() - startdt
+                if not (delta < cutoff):
+                    if args.verbose: print('Skip this task, too old!')
+                    continue
+            
             if '=>' in end:
                 end, foo = end.split('=>')
                 end = end.strip()
@@ -131,14 +162,16 @@ if __name__ == '__main__':
                 logs = log.read()
                 log.close()
 
-            if "%s %s %s %s" % (curr_prj, curr_task, prepare_date(start), prepare_date(end)) in logs:
-                print(" [-] already added %s %s %s %s" % (curr_prj, curr_task, prepare_date(start), prepare_date(end)))
+            if "%s %s" % (prepare_date(start), prepare_date(end)) in logs:
+                #if args.debug:
+                print(" [-] already added %s %s" % (prepare_date(start), prepare_date(end)))
             else:
-                print(" [x] added %s %s %s %s" % (curr_prj, curr_task, prepare_date(start), prepare_date(end)))
-                insert_event(calendar, curr_prj,curr_task, prepare_date(start), prepare_date(end))
-                log = open(logfn, 'a')
-                log.write("%s %s %s %s\n" % (curr_prj, curr_task, prepare_date(start), prepare_date(end)))
-                log.close()
+                print(" [x] added %s %s" % (prepare_date(start), prepare_date(end)))
+                insert_event(args.calendar, curr_prj, curr_task, prepare_date(start), prepare_date(end), args.dry)
+                if not args.dry:
+                    log = open(logfn, 'a')
+                    log.write("%s %s\n" % (prepare_date(start), prepare_date(end)))
+                    log.close()
 
             if args.debug:
                 break
