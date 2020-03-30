@@ -47,3 +47,7 @@ Example:
 The script is straightforward, it's a hack in some sense. For each clocking entry, an Apple Script is generated and Apple Tell is executed to push a new even to selected Calendar. Works only on Mac. All already entered entries go to a log file, so they are not entered one again.
 
 [1] https://orgmode.org/manual/Clocking-commands.html#Clocking-commands
+
+Changelog:
+
+- 200330 --date DATE
