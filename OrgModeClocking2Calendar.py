@@ -18,7 +18,7 @@ import time
 
 os.environ['TZ'] = 'Europe/Warsaw'
 time.tzset()
-
+REGION = 'euro'
 from datetime import date, timedelta
 
 
@@ -56,17 +56,29 @@ def prepare_date(str, retdata=False, double=False, verbose=False):
     hour, min = [int(i) for i in timex.split(':')]
     year, month, day = [int(i) for i in date.split('-')]
     dt = datetime.datetime(year, month, day, hour, min, 0, 0)
-
-    if double:
-        if retdata:
-            return dt, datetime.date(year, month, day)
+    
+    if REGION == 'euro':
+        if double:
+            if retdata:
+                return dt, datetime.date(year, month, day)
+            else:
+                return dt.strftime("%A, %d %B, %Y %H:%M"), dt.strftime("%A, %B %d")  # return as a string
         else:
-            return dt.strftime("%A, %B %d, %Y %I:%M %p"), dt.strftime("%A, %B %d")  # return as a string
+            if retdata:
+                return dt
+            else:
+                return dt.strftime("%A, %d %B, %Y %H:%M")
     else:
-        if retdata:
-            return dt
+        if double:
+            if retdata:
+                return dt, datetime.date(year, month, day)
+            else:
+                return dt.strftime("%A, %B %d, %Y %I:%M %p"), dt.strftime("%A, %B %d")  # return as a string
         else:
-            return dt.strftime("%A, %B %d, %Y %I:%M %p")
+            if retdata:
+                return dt
+            else:
+                return dt.strftime("%A, %B %d, %Y %I:%M %p")
 
 
 def insert_event(calendar, project, task, start, end, dry):
@@ -131,7 +143,8 @@ if __name__ == '__main__':
                 if args.debug: print(curr_prj)
             except NameError:
                 if args.debug: print("Error in %s" % l)
-            print("%s %s %s %s" % (curr_prj, curr_task, prepare_date(start, verbose=args.verbose), prepare_date(end, verbose=args.verbose)))
+            if args.verbose:
+                print("%s %s %s %s" % (curr_prj, curr_task, prepare_date(start, verbose=args.verbose), prepare_date(end, verbose=args.verbose)))
                 
             if args.date:
                 # if given date
@@ -165,6 +178,7 @@ if __name__ == '__main__':
             if "%s %s" % (prepare_date(start), prepare_date(end)) in logs:
                 #if args.debug:
                 print(" [-] already added %s %s" % (prepare_date(start), prepare_date(end)))
+                pass
             else:
                 print(" [x] added %s %s" % (prepare_date(start), prepare_date(end)))
                 insert_event(args.calendar, curr_prj, curr_task, prepare_date(start), prepare_date(end), args.dry)
