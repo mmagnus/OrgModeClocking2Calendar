@@ -33,6 +33,7 @@ def get_parser():
     parser.add_argument("--date", help="in format 2010-01-01")
     parser.add_argument("calendar", help="calendar you want to send your data to", default="Clocking Work")
     parser.add_argument("--dry", action="store_true")
+    parser.add_argument("--filter", help="folder only for this phrase")
     parser.add_argument("file", help="an OrgMode file")
     return parser
 
@@ -115,7 +116,10 @@ if __name__ == '__main__':
     if args.log:
         logfn = args.log
     else:
-        logfn = os.path.basename(args.file.replace('.org', '.log'))
+        if args.filter:
+            logfn = os.path.basename(args.file.replace('.org', '.' + args.filter + '.log'))
+        else:
+            logfn = os.path.basename(args.file.replace('.org', '.log'))            
 
     for l in f:
         if l.startswith('* '):
@@ -135,8 +139,17 @@ if __name__ == '__main__':
 
             ###
             startdt, startdt_day = prepare_date(start, retdata=True, double=True)
-            curr_task = curr_task.replace('DONE ', '').replace('TODO ', '').replace('INPROGRESS ', '')
-            curr_prj = curr_prj.replace('DONE ', '').replace('TODO ', '').replace('INPROGRESS ', '')
+            
+            curr_task = curr_task.replace('DONE ', '').replace('TODO ', '').replace('INPROGRESS ', '').replace('WAITING', '')
+            curr_prj = curr_prj.replace('DONE ', '').replace('TODO ', '').replace('INPROGRESS ', '').replace('WAITING', '')
+
+            
+            if args.filter:
+                if args.filter in curr_prj:
+                    print(curr_prj)
+                else:
+                    continue
+                
             
             if args.debug: print('∆:', delta, 'cutoff:', cutoff, 'use it:', delta < cutoff)
             try:
