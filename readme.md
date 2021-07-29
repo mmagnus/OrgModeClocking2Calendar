@@ -3,9 +3,9 @@ OrgModeClocking2Calendar
 The script will perform one way synchronization of your clocking (time tracking) entries [1] from OrgMode Emacs.
 ![](example.png)
 
-    $ ./OrgModeClocking2Calendar.py -h
+    (py37) [mx] orgmode2calendar$ git:(master) ✗ ./OrgModeClocking2Calendar.py --help
     usage: OrgModeClocking2Calendar.py [-h] [--debug] [-d DAYS] [-v] [--log LOG]
-                                       [--date DATE] [--dry]
+                                       [--date DATE] [--dry] [--filter FILTER]
                                        calendar file
 
     - fix arguments not to be hard coded
@@ -26,6 +26,7 @@ The script will perform one way synchronization of your clocking (time tracking)
       --log LOG
       --date DATE           in format 2010-01-01
       --dry
+      --filter FILTER       folder only for this phrase
 
 Example:
 
@@ -44,10 +45,16 @@ Example:
     Skip this task, too old!
     (...)
 
+or with a filter (new in 2021):
+
+    ./OrgModeClocking2Calendar.py -d 3 mq  /Users/magnus//geekbook/notes/work-curr.org --filter '#mq' --log mq.log
+    # insert clockings into mq calendar
+
 The script is straightforward, it's a hack in some sense. For each clocking entry, an Apple Script is generated and Apple Tell is executed to push a new even to selected Calendar. Works only on Mac. All already entered entries go to a log file, so they are not entered one again.
 
 [1] https://orgmode.org/manual/Clocking-commands.html#Clocking-commands
 
 Changelog:
 
+- 210729 add --filter
 - 200330 --date DATE
