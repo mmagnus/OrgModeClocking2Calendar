@@ -1,7 +1,7 @@
 OrgModeClocking2Calendar
 -------------------------------------------------------------------------------
 
-![hmgi7zdv67e71](https://user-images.githubusercontent.com/118740/127624535-66fa5243-94f3-4d4d-90a7-b60ae8a8f0d3.jpg)
+![](example.png)
 
 The script will perform one way synchronization of your clocking (time tracking) entries [1] from OrgMode Emacs.
 
@@ -16,8 +16,6 @@ The script doesn't read your calendar to see what was already inserted. The scri
 which means that *some* event was added for this time slot. Consequently, you can edit this task, and it will not be re-inserted into your calendar. But, if you change clocking (start or end) for this task,  it will be inserted. Then you have to remove redundant events from your calendar manually. Not perfect, but this is how it is right now. That's why it is better to use `--days` with a short date (for example, `-d 7` to insert events from the last week) spans so you can check if there are no redundancies in your Calendar. This could be fixed at some point.
 
 To play around, you can use `--dry` to see the output of the script but not inserting anything into your calendars.
-
-![](example.png)
 
     (py37) [mx] orgmode2calendar$ git:(master) ✗ ./OrgModeClocking2Calendar.py --help
     usage: OrgModeClocking2Calendar.py [-h] [--debug] [-d DAYS] [-v] [--log LOG]
@@ -74,6 +72,8 @@ or with a filter (new in 2021):
 The script is straightforward, it's a hack in some sense. For each clocking entry, an Apple Script is generated and Apple Tell is executed to push a new even to selected Calendar. Works only on Mac. All already entered entries go to a log file, so they are not entered one again.
 
 [1] https://orgmode.org/manual/Clocking-commands.html#Clocking-commands
+
+![hmgi7zdv67e71](https://user-images.githubusercontent.com/118740/127624535-66fa5243-94f3-4d4d-90a7-b60ae8a8f0d3.jpg)
 
 Changelog:
 
