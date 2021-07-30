@@ -1,6 +1,22 @@
 OrgModeClocking2Calendar
 -------------------------------------------------------------------------------
+
+![hmgi7zdv67e71](https://user-images.githubusercontent.com/118740/127624535-66fa5243-94f3-4d4d-90a7-b60ae8a8f0d3.jpg)
+
 The script will perform one way synchronization of your clocking (time tracking) entries [1] from OrgMode Emacs.
+
+The script scans all lines in your OrgMode file that start with 'CLOCK:' and converts these lines into events to be inserted into your calendar of choice.
+
+The script uses Apple Scripts (`insert_event()`) to insert a given event into a calendar. This could be changed in the future to some other function based on other tools, such as: Gcalcli.
+
+The script doesn't read your calendar to see what was already inserted. The script is using a simple log file. The syntax is as the following:
+
+	Thursday, 29 July, 2021 15:30 Thursday, 29 July, 2021 16:30
+
+which means that *some* event was added for this time slot. Consequently, you can edit this task, and it will not be re-inserted into your calendar. But, if you change clocking (start or end) for this task,  it will be inserted. Then you have to remove redundant events from your calendar manually. Not perfect, but this is how it is right now. That's why it is better to use `--days` with a short date (for example, `-d 7` to insert events from the last week) spans so you can check if there are no redundancies in your Calendar. This could be fixed at some point.
+
+To play around, you can use `--dry` to see the output of the script but not inserting anything into your calendars.
+
 ![](example.png)
 
     (py37) [mx] orgmode2calendar$ git:(master) ✗ ./OrgModeClocking2Calendar.py --help
