@@ -48,7 +48,12 @@ Example:
 or with a filter (new in 2021):
 
     ./OrgModeClocking2Calendar.py -d 3 mq  /Users/magnus//geekbook/notes/work-curr.org --filter '#mq' --log mq.log
-    # insert clockings into mq calendar
+    # insert clockings related to "#mq" (a tag I used for this project) into mq calendar (on your Mac, this 
+    # calendar can be both Apple Calendar and Google Calendar, 
+    # -d 3 means to use clocking from last 3 days (inclusive)
+    # and the clocking inserted are saved into mq.log
+    # (this file is used to check what is already in the calendar, if you remove this file that the script 
+    # will simply add again all the clockings for "#mq")
 
 The script is straightforward, it's a hack in some sense. For each clocking entry, an Apple Script is generated and Apple Tell is executed to push a new even to selected Calendar. Works only on Mac. All already entered entries go to a log file, so they are not entered one again.
 
