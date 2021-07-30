@@ -5,6 +5,8 @@ OrgModeClocking2Calendar
 
 The script will perform one way synchronization of your clocking (time tracking) entries [1] from OrgMode Emacs.
 
+The script is straightforward, it's a hack in some sense. For each clocking entry, an Apple Script is generated and Apple Tell is executed to push a new even to selected Calendar. Works only on Mac. All already entered entries go to a log file, so they are not entered one again.
+
 The script scans all lines in your OrgMode file that start with 'CLOCK:' and converts these lines into events to be inserted into your calendar of choice.
 
 The script uses Apple Scripts (`insert_event()`) to insert a given event into a calendar. This could be changed in the future to some other function based on other tools, such as: Gcalcli.
@@ -68,8 +70,6 @@ or with a filter (new in 2021):
     # and the clocking inserted are saved into mq.log
     # (this file is used to check what is already in the calendar, if you remove this file that the script 
     # will simply add again all the clockings for "#mq")
-
-The script is straightforward, it's a hack in some sense. For each clocking entry, an Apple Script is generated and Apple Tell is executed to push a new even to selected Calendar. Works only on Mac. All already entered entries go to a log file, so they are not entered one again.
 
 [1] https://orgmode.org/manual/Clocking-commands.html#Clocking-commands
 
